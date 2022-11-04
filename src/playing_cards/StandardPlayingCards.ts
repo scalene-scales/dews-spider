@@ -246,3 +246,35 @@ export function compareRankByStack(
   const rankB = convertRankToStackComparable(cardB.rank);
   return rankA - rankB;
 }
+
+export const STANDARD_PLAYING_CARD_RANKS: ReadonlyArray<StandardPlayingCardRank> =
+  ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"];
+
+export function shuffleDeck<T extends StandardPlayingCard>(
+  deck: Array<T>
+): Array<T> {
+  // https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle#The_modern_algorithm
+  for (let i = 0; i < deck.length - 1; i++) {
+    const swapIndex = Math.floor(i + Math.random() * (deck.length - i));
+    const temp = deck[i];
+    deck[i] = deck[swapIndex];
+    deck[swapIndex] = temp;
+  }
+  return deck;
+}
+
+export function generateDeck(
+  cardSets: number,
+  suits: Array<StandardPlayingCardSuit>,
+  shuffle: boolean = true
+): Array<StandardPlayingCard> {
+  const deck: Array<StandardPlayingCard> = [];
+  for (let i = 0; i < cardSets; i++) {
+    for (const rank of STANDARD_PLAYING_CARD_RANKS) {
+      for (const suit of suits) {
+        deck.push({ rank: rank, suit: suit });
+      }
+    }
+  }
+  return shuffle ? shuffleDeck(deck) : deck;
+}

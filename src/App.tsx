@@ -1,10 +1,14 @@
-import React from "react";
+import React, { useMemo } from "react";
 import logo from "./logo.svg";
 import { Counter } from "./features/counter/Counter";
 import "./App.css";
 import PlayingCard from "./playing_cards/PlayingCard";
+import { createInitialPiles } from "./spider/SpiderSolitaireEngine";
 
 function App() {
+  const piles = useMemo(() => createInitialPiles(), []);
+  // console.log(piles);
+
   return (
     <div className="App">
       <header className="App-header">
@@ -16,9 +20,9 @@ function App() {
         <Counter />
         <p>
           Edit <code>src/App.tsx</code> and save to reload.
-          <PlayingCard card={{ rank: "A", suit: "♠" }} />
-          <PlayingCard card={{ rank: "A", suit: "♥" }} />
         </p>
+        <PlayingCard card={{ rank: "A", suit: "♠" }} />
+        <PlayingCard card={{ rank: "A", suit: "♥" }} />
         <span>
           <span>Learn </span>
           <a
