@@ -1,25 +1,35 @@
 import {
+  compareRankByStack,
   generateDeck,
   StandardPlayingCard as Card,
   StandardPlayingCardSuit as Suit,
 } from "../playing_cards/StandardPlayingCards";
 
-type TableauCardState = "revealed" | "hidden" | "known";
-type TableauCard = Card & { state: TableauCardState };
-type CompletedPileState = Suit | "none";
-
 const STOCK_SIZE = 5;
 const FOUNDATION_SIZE = 8;
 const TABLEAU_SIZE = 10;
 
+export type TableauCardState = "revealed" | "hidden" | "known";
+export type TableauCard = Card & { state: TableauCardState };
+export type CompletedPileState = Suit | "none";
+export type Tableau = Array<Array<TableauCard>>;
+export type MoveTableauStack = {
+  // The tableau pile to move the stack from
+  fromPileIndex: number;
+  // The tableau pile to move the stack to
+  toPileIndex: number;
+  // The index of the card in the from tableau pile to move
+  pileStackIndex: number;
+};
+
 export interface PilesState {
   stock: Array<Array<Card>>;
   foundations: Array<CompletedPileState>;
-  tableau: Array<Array<TableauCard>>;
+  tableau: Tableau;
 }
 
-export function revealTableau(piles: PilesState): void {
-  for (const tableauStack of piles.tableau) {
+export function revealTableau(tableau: Tableau): void {
+  for (const tableauStack of tableau) {
     const lastCard = tableauStack.at(-1);
     if (lastCard) {
       lastCard.state = "revealed";
@@ -68,7 +78,40 @@ export function createInitialPiles(
     tableauIndex = (tableauIndex + 1) % piles.tableau.length;
   }
 
-  revealTableau(piles);
+  revealTableau(piles.tableau);
 
   return piles;
+}
+
+export function canMoveStack(
+  move: MoveTableauStack,
+  tableau: Tableau
+): boolean {
+  const movedStack = tableau[move.fromPileIndex].slice(move.pileStackIndex);
+  const bottomCardInStack = movedStack.at(0);
+  const topCardInToPile = tableau[move.toPileIndex].at(-1);
+
+  // Empty stack
+  if (!bottomCardInStack) {
+    return false;
+  }
+  // Check all cards in the stack have the same suit and are revealed
+  if (
+    !movedStack.every(
+      (card) =>
+        card.suit === bottomCardInStack.suit && card.state === "revealed"
+    )
+  ) {
+    return false;
+  }
+  // Check if the pile to move to is empty
+  if (!topCardInToPile) {
+    return true;
+  }
+  return compareRankByStack(bottomCardInStack, topCardInToPile) < 0;
+}
+
+export function moveStack(move: MoveTableauStack, tableau: Tableau): void {
+  const movedStack = tableau[move.fromPileIndex].splice(move.pileStackIndex);
+  tableau[move.toPileIndex].push(...movedStack);
 }
