@@ -208,9 +208,9 @@ export function completeFoundationMove(
   if (!topTableauCard) {
     return null;
   }
-  for (const _ of STANDARD_PLAYING_CARD_RANKS) {
-    piles.tableau[move.tableauPileIndex].pop();
-  }
+  STANDARD_PLAYING_CARD_RANKS.forEach((_) =>
+    piles.tableau[move.tableauPileIndex].pop()
+  );
   piles.foundations.push(topTableauCard.suit);
   return move;
 }
