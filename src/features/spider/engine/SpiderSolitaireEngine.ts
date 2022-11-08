@@ -4,7 +4,7 @@ import {
   StandardPlayingCard as Card,
   StandardPlayingCardSuit as Suit,
   STANDARD_PLAYING_CARD_RANKS,
-} from "../playing_cards/StandardPlayingCards";
+} from "../../playing_cards/StandardPlayingCards";
 
 const STOCK_SIZE = 5;
 const FOUNDATION_SIZE = 8;

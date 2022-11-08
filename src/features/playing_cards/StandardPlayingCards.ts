@@ -255,6 +255,7 @@ export function shuffleDeck<T extends StandardPlayingCard>(
 ): Array<T> {
   // https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle#The_modern_algorithm
   for (let i = 0; i < deck.length - 1; i++) {
+    // TODO: Use a seedable PRNG.
     const swapIndex = Math.floor(i + Math.random() * (deck.length - i));
     const temp = deck[i];
     deck[i] = deck[swapIndex];

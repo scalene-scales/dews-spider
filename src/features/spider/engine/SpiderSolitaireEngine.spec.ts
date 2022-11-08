@@ -2,13 +2,13 @@ import {
   StandardPlayingCard,
   StandardPlayingCardRank,
   StandardPlayingCardSuit,
-} from "../playing_cards/StandardPlayingCards";
+} from "../../playing_cards/StandardPlayingCards";
 import {
+  TableauCardState,
+  TableauCard,
+  Tableau,
   canMoveStack,
   moveStack,
-  Tableau,
-  TableauCard,
-  TableauCardState,
 } from "./SpiderSolitaireEngine";
 
 function card(
