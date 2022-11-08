@@ -1,8 +1,8 @@
 import "./App.css";
-import PlayingCard from "../features/playing_cards/PlayingCard";
 import CssBaseline from "@mui/material/CssBaseline";
 import AppBar from "@mui/material/AppBar";
 import Typography from "@mui/material/Typography";
+import SpiderSolitaireGame from "../features/spider/SpiderSolitaireGame";
 
 function App() {
   return (
@@ -18,8 +18,7 @@ function App() {
               DEWS - Spider
             </Typography>
           </AppBar>
-          <PlayingCard card={{ rank: "A", suit: "♠" }} />
-          <PlayingCard card={{ rank: "A", suit: "♥" }} />
+          <SpiderSolitaireGame />
         </header>
       </div>
     </>

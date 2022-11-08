@@ -2,10 +2,8 @@ import React from "react";
 import Paper from "@mui/material/Paper";
 import { Box } from "@mui/material";
 import PlayingCardBase from "./PlayingCardBase";
-import { StandardPlayingCard } from "./StandardPlayingCards";
 
-export default function PlayingCard(props: {
-  card: StandardPlayingCard;
+export default function PlayingCardSlot(props: {
   style?: React.CSSProperties;
 }) {
   return (
@@ -16,13 +14,23 @@ export default function PlayingCard(props: {
         ...props.style,
       }}>
       <PlayingCardBase
-        card={props.card}
+        card={{ rank: "A", suit: "♠" }}
         style={{ zIndex: 0 }}
       />
       <Paper
         sx={{
           zIndex: 1,
-          background: "transparent",
+          backgroundColor: "#6c83ff",
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+        }}
+        elevation={3}></Paper>
+      <Paper
+        sx={{
+          zIndex: 2,
           border: "5px solid #b3bfff",
           position: "absolute",
           top: 0,
