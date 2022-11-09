@@ -27,6 +27,7 @@ export type HistoricDealStockMove = { type: "deal_stock" };
 export type HistoricCompleteFoundationMove = {
   type: "complete_foundation";
   tableauPileIndex: number;
+  revealedCard: boolean;
 };
 export type HistoricTableauStackMove = TableauStackMove & {
   type: "move_tableau_stack";
@@ -141,6 +142,38 @@ export function canMoveStack(
   return compareRankByStack(bottomCardInStack, topCardInToPile) < 0;
 }
 
+export function mapTableauPileMovability(
+  tableauPile: Array<TableauCard>
+): Array<boolean> {
+  const movable: Array<boolean> = [];
+
+  let lastCard = tableauPile.at(-1);
+  if (lastCard) {
+    movable.push(true);
+    for (let i = tableauPile.length - 2; i >= 0; i--) {
+      const currentCard = tableauPile[i];
+      if (currentCard.state !== "revealed") {
+        movable.push(false);
+        continue;
+      }
+
+      if (compareRankByStack(lastCard, currentCard) >= 0) {
+        movable.push(false);
+        continue;
+      }
+
+      if (lastCard.suit !== currentCard.suit) {
+        movable.push(false);
+        continue;
+      }
+
+      movable.push(true);
+      lastCard = currentCard;
+    }
+  }
+  return movable.reverse();
+}
+
 export function moveStack(
   move: TableauStackMove,
   tableau: Tableau
@@ -167,9 +200,9 @@ export function moveStack(
   return historicMove;
 }
 
-function nextCompletableFoundation(
+function nextCompletableFoundationTableauPileIndex(
   piles: PilesState
-): HistoricCompleteFoundationMove | null {
+): number | null {
   nextTableauPile: for (let i = 0; i < piles.tableau.length; i++) {
     const tableauPile = piles.tableau[i];
     if (tableauPile.length < STANDARD_PLAYING_CARD_RANKS.length) {
@@ -188,31 +221,39 @@ function nextCompletableFoundation(
         continue nextTableauPile;
       }
     }
-    return { type: "complete_foundation", tableauPileIndex: i };
+    return i;
   }
   return null;
 }
 
-export function canCompleteFoundation(piles: PilesState): boolean {
-  return nextCompletableFoundation(piles) == null;
-}
-
-export function completeFoundationMove(
+export function tryCompleteFoundationMove(
   piles: PilesState
 ): HistoricCompleteFoundationMove | null {
-  const move = nextCompletableFoundation(piles);
-  if (!move) {
+  const tableauPileIndex = nextCompletableFoundationTableauPileIndex(piles);
+  if (tableauPileIndex == null) {
     return null;
   }
-  const topTableauCard = piles.tableau[move.tableauPileIndex].at(-1);
+  const topTableauCard = piles.tableau[tableauPileIndex].at(-1);
   if (!topTableauCard) {
     return null;
   }
   STANDARD_PLAYING_CARD_RANKS.forEach((_) =>
-    piles.tableau[move.tableauPileIndex].pop()
+    piles.tableau[tableauPileIndex].pop()
   );
-  piles.foundations.push(topTableauCard.suit);
-  return move;
+
+  const lastEmptyFoundation = piles.foundations.lastIndexOf("none");
+  piles.foundations[lastEmptyFoundation] = topTableauCard.suit;
+
+  let revealedCard = false;
+  const newTopTableauCard = piles.tableau[tableauPileIndex].at(-1);
+  if (newTopTableauCard) {
+    if (newTopTableauCard.state !== "revealed") {
+      newTopTableauCard.state = "revealed";
+      revealedCard = true;
+    }
+  }
+
+  return { type: "complete_foundation", tableauPileIndex, revealedCard };
 }
 
 function undoTableauStackMove(
@@ -260,6 +301,12 @@ export function undoMove(move: HistoricSpiderSolitaireMove, piles: PilesState) {
       const lastCompletedFoundation = piles.foundations.at(-1);
       if (lastCompletedFoundation) {
         if (lastCompletedFoundation !== "none") {
+          if (move.revealedCard) {
+            const revealedCard = piles.tableau[move.tableauPileIndex].at(-1);
+            if (revealedCard) {
+              revealedCard.state = "known";
+            }
+          }
           const newStack: Array<TableauCard> = generateDeck(
             1,
             [lastCompletedFoundation],
@@ -286,7 +333,7 @@ export function redoMove(move: HistoricSpiderSolitaireMove, piles: PilesState) {
       moveStack(move, piles.tableau);
       break;
     case "complete_foundation":
-      completeFoundationMove(piles);
+      tryCompleteFoundationMove(piles);
       break;
   }
 }

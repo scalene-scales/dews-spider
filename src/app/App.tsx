@@ -10,7 +10,7 @@ function App() {
       <CssBaseline enableColorScheme />
       <div className="App">
         <header className="App-header">
-          <AppBar>
+          <AppBar position="sticky">
             <Typography
               variant="h3"
               component="div"
