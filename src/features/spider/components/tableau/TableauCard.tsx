@@ -16,16 +16,20 @@ export default function TableauCard(props: {
   onMoving: (isMoving: boolean) => void;
   style?: React.CSSProperties;
 }) {
-  const [{ isDragging }, drag, dragPreview] = useDrag(() => ({
-    type: SpiderDragTypes.TABLEAU_STACK,
-    item: props.dragData,
-    canDrag: props.canMove ?? false,
-    collect: (monitor) => ({
-      isDragging: !!monitor.isDragging(),
+  const [{ isDragging }, drag, dragPreview] = useDrag(
+    () => ({
+      type: SpiderDragTypes.TABLEAU_STACK,
+      item: props.dragData,
+      canDrag: props.canMove ?? false,
+      collect: (monitor) => ({
+        isDragging: !!monitor.isDragging(),
+      }),
     }),
-  }));
+    [props.dragData, props.canMove]
+  );
 
-  useEffect(() => props.onMoving(isDragging), [props, isDragging]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => props.onMoving(isDragging), [isDragging]);
 
   useEffect(() => {
     dragPreview(getEmptyImage(), { captureDraggingState: true });
@@ -33,10 +37,15 @@ export default function TableauCard(props: {
 
   switch (props.card.state) {
     case "revealed":
+    case "known":
       return (
         <div
           ref={drag}
-          style={{ height: 10, ...props.style }}>
+          style={{
+            height: 50,
+            opacity: props.card.state === "known" ? 0.5 : undefined,
+            ...props.style,
+          }}>
           <PlayingCard card={props.card} />
         </div>
       );

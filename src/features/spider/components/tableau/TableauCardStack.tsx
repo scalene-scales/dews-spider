@@ -5,6 +5,7 @@ import {
   TableauCard as TableauCardType,
 } from "features/spider/engine/SpiderSolitaireEngine";
 import { useMemo, useState } from "react";
+import PlayingCardSlot from "features/playing_cards/PlayingCardSlot";
 
 export default function TableauCardStack(props: {
   tableauIndex?: number | undefined;
@@ -12,8 +13,11 @@ export default function TableauCardStack(props: {
 }) {
   const [movingIndex, setMovingIndex] = useState<number | null>(null);
   const draggable: Array<boolean> = useMemo(
-    () => mapTableauPileMovability(props.cards),
-    [props.cards]
+    () =>
+      props.tableauIndex != null
+        ? mapTableauPileMovability(props.cards)
+        : Array(props.cards.length).fill(undefined),
+    [props.cards, props.tableauIndex]
   );
 
   return (
@@ -21,28 +25,31 @@ export default function TableauCardStack(props: {
       direction="column"
       spacing={1}
       sx={{ justifyContent: "start" }}>
-      {props.cards.map((card, index) => {
-        return (
-          <TableauCard
-            key={index}
-            dragData={
-              props.tableauIndex != null
-                ? {
-                    tableauPileCardIndex: index,
-                    tableauPileIndex: props.tableauIndex,
-                  }
-                : undefined
-            }
-            card={card}
-            canMove={draggable.at(index)}
-            onMoving={(isMoving) => setMovingIndex(isMoving ? index : null)}
-            style={{
-              zIndex: index,
-              display: movingIndex && movingIndex <= index ? "none" : undefined,
-            }}
-          />
-        );
-      })}
+      {props.cards.length > 0 &&
+        props.cards.map((card, index) => {
+          return (
+            <TableauCard
+              key={index}
+              dragData={
+                props.tableauIndex != null
+                  ? {
+                      tableauPileCardIndex: index,
+                      tableauPileIndex: props.tableauIndex,
+                    }
+                  : undefined
+              }
+              card={card}
+              canMove={draggable.at(index)}
+              onMoving={(isMoving) => setMovingIndex(isMoving ? index : null)}
+              style={{
+                zIndex: index,
+                display:
+                  movingIndex && movingIndex <= index ? "none" : undefined,
+              }}
+            />
+          );
+        })}
+      {props.cards.length <= 0 && <PlayingCardSlot />}
     </Stack>
   );
 }

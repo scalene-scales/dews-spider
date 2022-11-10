@@ -8,7 +8,7 @@ import {
   undoMove as undoSpiderMove,
   dealStockMove,
   redoMove as redoSpiderMove,
-  completeFoundationMove,
+  tryCompleteFoundationMove,
 } from "./engine/SpiderSolitaireEngine";
 
 type SpiderSolitaireState = {
@@ -48,6 +48,12 @@ export const spiderSlice = createSlice({
         state.past.push(state.present);
         state.present = historicMove;
       }
+
+      const completionMove = tryCompleteFoundationMove(state.piles);
+      if (completionMove) {
+        state.past.push(state.present);
+        state.present = completionMove;
+      }
     },
     moveStack: (state, action: PayloadAction<TableauStackMove>) => {
       const historicMove = moveSpiderStack(action.payload, state.piles.tableau);
@@ -55,12 +61,11 @@ export const spiderSlice = createSlice({
         state.past.push(state.present);
         state.present = historicMove;
       }
-    },
-    completeFoundation: (state) => {
-      const historicMove = completeFoundationMove(state.piles);
-      if (historicMove) {
+
+      const completionMove = tryCompleteFoundationMove(state.piles);
+      if (completionMove) {
         state.past.push(state.present);
-        state.present = historicMove;
+        state.present = completionMove;
       }
     },
     undoMove: (state) => {
@@ -91,13 +96,7 @@ export const spiderSlice = createSlice({
   },
 });
 
-export const {
-  restart,
-  dealStock,
-  moveStack,
-  completeFoundation,
-  undoMove,
-  redoMove,
-} = spiderSlice.actions;
+export const { restart, dealStock, moveStack, undoMove, redoMove } =
+  spiderSlice.actions;
 
 export default spiderSlice.reducer;
