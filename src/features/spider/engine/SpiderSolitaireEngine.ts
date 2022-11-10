@@ -55,9 +55,13 @@ function revealTableau(tableau: Tableau): void {
   }
 }
 
-export function createInitialPiles(
-  suits: Array<Suit> = ["♠", "♥"]
-): PilesState {
+export function createInitialPiles(options: {
+  suits?: Array<Suit>;
+  seed?: number | undefined;
+}): PilesState {
+  const suits = options.suits ?? ["♠", "♥"];
+  const seed = options.seed ?? null;
+
   let piles: PilesState = {
     stock: [],
     foundations: Array<CompletedPileState>(FOUNDATION_SIZE).fill("none"),
@@ -72,7 +76,7 @@ export function createInitialPiles(
     foundationSuits[i] = suits[suitsIndex];
     suitsIndex = (suitsIndex + 1) % suits.length;
   }
-  const deck = generateDeck(1, foundationSuits);
+  const deck = generateDeck(1, foundationSuits, seed);
 
   // Fill the stock
   for (let i = 0; i < STOCK_SIZE; i++) {
@@ -104,6 +108,11 @@ export function createInitialPiles(
 export function dealStockMove(piles: PilesState): HistoricDealStockMove | null {
   if (piles.stock.length < 1) {
     // No stock, so cannot deal.
+    return null;
+  }
+
+  if (!piles.tableau.every((tableauPile) => tableauPile.length > 0)) {
+    // Cannot deal a stock when there are empty tableau piles.
     return null;
   }
 
@@ -157,7 +166,7 @@ export function mapTableauPileMovability(
         continue;
       }
 
-      if (compareRankByStack(lastCard, currentCard) >= 0) {
+      if (compareRankByStack(lastCard, currentCard) !== -1) {
         movable.push(false);
         continue;
       }
@@ -324,11 +333,9 @@ export function undoMove(move: HistoricSpiderSolitaireMove, piles: PilesState) {
           }
 
           // Generate a new stack of cards.
-          const newStack: Array<TableauCard> = generateDeck(
-            1,
-            [lastCompletedFoundation],
-            false
-          )
+          const newStack: Array<TableauCard> = generateDeck(1, [
+            lastCompletedFoundation,
+          ])
             .reverse()
             .map((card) => {
               return { ...card, state: "revealed" };

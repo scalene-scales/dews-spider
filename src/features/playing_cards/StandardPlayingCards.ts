@@ -1,3 +1,5 @@
+import { randomLcg } from "d3-random";
+
 export type StandardPlayingCardSuit = "♠" | "♥" | "♦" | "♣";
 export type StandardPlayingCardRank =
   | "A"
@@ -251,12 +253,13 @@ export const STANDARD_PLAYING_CARD_RANKS: ReadonlyArray<StandardPlayingCardRank>
   ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"];
 
 export function shuffleDeck<T extends StandardPlayingCard>(
-  deck: Array<T>
+  deck: Array<T>,
+  seed?: number | null
 ): Array<T> {
+  const rng = randomLcg(seed != null ? seed : undefined);
   // https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle#The_modern_algorithm
   for (let i = 0; i < deck.length - 1; i++) {
-    // TODO: Use a seedable PRNG.
-    const swapIndex = Math.floor(i + Math.random() * (deck.length - i));
+    const swapIndex = Math.floor(i + rng() * (deck.length - i));
     const temp = deck[i];
     deck[i] = deck[swapIndex];
     deck[swapIndex] = temp;
@@ -267,7 +270,7 @@ export function shuffleDeck<T extends StandardPlayingCard>(
 export function generateDeck(
   cardSets: number,
   suits: Array<StandardPlayingCardSuit>,
-  shuffle: boolean = true
+  seed?: number | null | undefined
 ): Array<StandardPlayingCard> {
   const deck: Array<StandardPlayingCard> = [];
   for (let i = 0; i < cardSets; i++) {
@@ -277,5 +280,5 @@ export function generateDeck(
       }
     }
   }
-  return shuffle ? shuffleDeck(deck) : deck;
+  return seed !== undefined ? shuffleDeck(deck, seed) : deck;
 }

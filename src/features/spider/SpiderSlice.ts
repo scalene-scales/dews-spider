@@ -19,7 +19,7 @@ type SpiderSolitaireState = {
 };
 
 const initialState: SpiderSolitaireState = {
-  piles: createInitialPiles(),
+  piles: createInitialPiles({}),
   past: [],
   present: { type: "deal_stock" },
   future: [],
@@ -37,9 +37,7 @@ export const spiderSlice = createSlice({
         state.future = [];
       },
       prepare: () => {
-        // Need to prepare because random shuffling.
-        // TODO: Make this seedable.
-        return { payload: createInitialPiles() };
+        return { payload: createInitialPiles({}) };
       },
     },
     dealStock: (state) => {
