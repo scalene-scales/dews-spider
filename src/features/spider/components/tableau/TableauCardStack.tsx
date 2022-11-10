@@ -6,6 +6,7 @@ import {
 } from "features/spider/engine/SpiderSolitaireEngine";
 import { useMemo, useState } from "react";
 import PlayingCardSlot from "features/playing_cards/PlayingCardSlot";
+import { OmniOscillator, Synth } from "tone";
 
 export default function TableauCardStack(props: {
   tableauIndex?: number | undefined;
@@ -40,7 +41,14 @@ export default function TableauCardStack(props: {
               }
               card={card}
               canMove={draggable.at(index)}
-              onMoving={(isMoving) => setMovingIndex(isMoving ? index : null)}
+              onMoving={(isMoving) => {
+                if (isMoving) {
+                  const synth = new Synth().toDestination();
+                  synth.triggerAttackRelease("B1", "8n", "+0.01");
+                }
+
+                setMovingIndex(isMoving ? index : null);
+              }}
               style={{
                 zIndex: index,
                 display:
