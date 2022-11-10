@@ -139,7 +139,7 @@ export function canMoveStack(
   if (!topCardInToPile) {
     return true;
   }
-  return compareRankByStack(bottomCardInStack, topCardInToPile) < 0;
+  return compareRankByStack(bottomCardInStack, topCardInToPile) === -1;
 }
 
 export function mapTableauPileMovability(
@@ -174,14 +174,10 @@ export function mapTableauPileMovability(
   return movable.reverse();
 }
 
-export function moveStack(
+function baseMoveStack(
   move: TableauStackMove,
   tableau: Tableau
 ): HistoricTableauStackMove | null {
-  if (!canMoveStack(move, tableau)) {
-    return null;
-  }
-
   const movedStack = tableau[move.fromPileIndex].splice(move.pileStackIndex);
   tableau[move.toPileIndex].push(...movedStack);
 
@@ -198,6 +194,17 @@ export function moveStack(
   }
 
   return historicMove;
+}
+
+export function moveStack(
+  move: TableauStackMove,
+  tableau: Tableau
+): HistoricTableauStackMove | null {
+  if (!canMoveStack(move, tableau)) {
+    return null;
+  }
+
+  return baseMoveStack(move, tableau);
 }
 
 function nextCompletableFoundationTableauPileIndex(
@@ -274,7 +281,8 @@ function undoTableauStackMove(
       revealedCard.state = "known";
     }
   }
-  moveStack(undoMove, tableau);
+
+  baseMoveStack(undoMove, tableau);
 }
 
 function undoDealStockMove(_: HistoricDealStockMove, piles: PilesState) {
@@ -301,12 +309,21 @@ export function undoMove(move: HistoricSpiderSolitaireMove, piles: PilesState) {
       const lastCompletedFoundation = piles.foundations.at(-1);
       if (lastCompletedFoundation) {
         if (lastCompletedFoundation !== "none") {
+          // Reset the foundation status.
+          const completedFoundationIndex = piles.foundations.indexOf(
+            lastCompletedFoundation
+          );
+          piles.foundations[completedFoundationIndex] = "none";
+
+          // Unreveal the card.
           if (move.revealedCard) {
             const revealedCard = piles.tableau[move.tableauPileIndex].at(-1);
             if (revealedCard) {
               revealedCard.state = "known";
             }
           }
+
+          // Generate a new stack of cards.
           const newStack: Array<TableauCard> = generateDeck(
             1,
             [lastCompletedFoundation],
