@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/dews-spider/static/css/main.9d4ba28c.css",
+    "main.js": "/dews-spider/static/js/main.06156b74.js",
+    "static/js/787.44939cd5.chunk.js": "/dews-spider/static/js/787.44939cd5.chunk.js",
+    "index.html": "/dews-spider/index.html",
+    "main.9d4ba28c.css.map": "/dews-spider/static/css/main.9d4ba28c.css.map",
+    "main.06156b74.js.map": "/dews-spider/static/js/main.06156b74.js.map",
+    "787.44939cd5.chunk.js.map": "/dews-spider/static/js/787.44939cd5.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.9d4ba28c.css",
+    "static/js/main.06156b74.js"
+  ]
+}
